@@ -42,9 +42,14 @@ function preprocFile($inName, $constants, $fout)
 	chdir(dirname($inName));
 	
 	$i = 0;
+	$skip = false;
 	while ($s = fgets($fin)) {
 		
 		$i++;
+		if ($skip) {
+			continue;
+		}
+		
 		//it's #include
 		preg_match('!^\s*(#|\/\/|\/\*)#include\s+(.*?)(\*\/)?\s*$!', $s, $matches);
 		if ($matches && ($matches[1] != '/*' || isset($matches[3]))) {
@@ -63,6 +68,16 @@ function preprocFile($inName, $constants, $fout)
 			}
 			continue;
 		}	
+		
+		//it's #ifdef or ifndef
+		preg_match('!^\s*(#|\/\/|\/\*)(#ifn?def)\s+(.*?)(\*\/)?\s*$!', $s, $matches);
+		if ($matches && ($matches[1] != '/*' || isset($matches[4]))) {
+			$skip = !in_array($matches[3], $constants);
+			if ($matches[2] == '#ifndef') {
+				$skip = !$skip;
+			}
+			
+		}
 		
 		//it's not command for preprocessor
 		fputs($fout, $s);
