@@ -44,14 +44,16 @@ function preprocFile($inName, $constants, $fout)
 		preg_match('!^\s*(#|\/\/|\/\*)#include\s+(.*?)(\*\/)?\s*$!', $s, $matches);
 		if ($matches && ($matches[1] != '/*' || isset($matches[3]))) {
 			$includeName = trim($matches[2]);
-			preprocFile(realpath($includeName), $constants, $fout);
-			//fputs($fout, "\r\n");
-		}
-		else {
-			fputs($fout, $s);
-			if (substr($s, -1) !== "\n") {
-				fputs($fout, "\r\n");
+			$ok = preprocFile(realpath($includeName), $constants, $fout);
+			if (! $ok) {
+				return false;
 			}
+			continue;
+		}	
+		
+		fputs($fout, $s);
+		if (substr($s, -1) !== "\n") {
+			fputs($fout, "\r\n");
 		}
 	}
 	
