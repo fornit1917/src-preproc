@@ -2,7 +2,7 @@
 
 $paramsCount = count($argv);
 if ($paramsCount < 3 || $paramsCount > 4) {
-	die ("ERROR: неверное количество параметров\r\n");
+	die ("ERROR: wrong number of parameters\r\n");
 }
 
 $inName = $argv[1];
@@ -17,7 +17,7 @@ else {
 
 $fout = fopen($outName, 'w');
 if ($fout === false) {
-	die("ERROR: невозможно открыть для записи файл $outName\r\n");
+	die("ERROR: can not open the file \"$outName\" for writing \r\n");
 }
 
 $ok = preprocFile($inName, $constants, $fout);
@@ -26,21 +26,36 @@ if (!$ok && is_file($outName)) {
 	unlink($outName);
 }
 else {
-	echo "Обработка успешно завершено\r\n";
+	echo "Preprocessing completed successfully\r\n";
 }
 
 function preprocFile($inName, $constants, $fout)
 {
 	$fin = fopen($inName, 'r');
 	if ($fin === false) {
-		echo "ERROR: Невозможно открыть для чтения файл $inName";
+		echo "ERROR: can not open the file \"$inName\" for reading \r\n";
 		return false;
 	}
 	
+	$preWd = getcwd();
+	chdir(dirname($inName));
 	while ($s = fgets($fin)) {
-		fputs($fout, $s);
+
+		preg_match('!^\s*(#|\/\/|\/\*)#include\s+(.*?)(\*\/)?\s*$!', $s, $matches);
+		if ($matches && ($matches[1] != '/*' || isset($matches[3]))) {
+			$includeName = trim($matches[2]);
+			preprocFile(realpath($includeName), $constants, $fout);
+			//fputs($fout, "\r\n");
+		}
+		else {
+			fputs($fout, $s);
+			if (substr($s, -1) !== "\n") {
+				fputs($fout, "\r\n");
+			}
+		}
 	}
 	
 	fclose($fin);
+	chdir($preWd);
 	return true;
 }
