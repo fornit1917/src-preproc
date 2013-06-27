@@ -49,8 +49,7 @@ function preprocFile($inName, $constants, $fout)
 		preg_match('!^\s*(#|\/\/|\/\*)#include\s+(.*?)(\*\/)?\s*$!', $s, $matches);
 		if ($matches && ($matches[1] != '/*' || isset($matches[3]))) {
 			$includeName = trim($matches[2]);
-			$includeFullName = realpath($includeName);
-			if($includeFullName === false) {
+			if(!is_file($includeName)) {
 				echo "ERROR in \"".  realpath($inName)."\", line $i: file \"$includeName\" not exists \r\n";
 				chdir($preWd);
 				return false;
