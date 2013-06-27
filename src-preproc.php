@@ -84,9 +84,9 @@ function preprocFile($inName, $constants, $fout)
 		}	
 		
 		//it's #ifdef or ifndef
-		preg_match('!^\s*(#|\/\/|\/\*)(#ifn?def)\s+(.*?)(\*\/)?\s*$!', $s, $matches);
+		preg_match('!^\s*(#|\/\/|\/\*)(#ifn?def)\s+(.+?)(\*\/)?\s*$!', $s, $matches);
 		if ($matches && ($matches[1] != '/*' || isset($matches[4]))) {
-			$skip = !in_array($matches[3], $constants);
+			$skip = !in_array(trim($matches[3]), $constants);
 			if ($matches[2] == '#ifndef') {
 				$skip = !$skip;
 			}
