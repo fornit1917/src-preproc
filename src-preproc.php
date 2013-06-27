@@ -43,9 +43,24 @@ function preprocFile($inName, $constants, $fout)
 	
 	$i = 0;
 	$skip = false;
+	$openIfCount = 0;
 	while ($s = fgets($fin)) {
-		
+			
 		$i++;
+		
+		//if exists not closing #ifdef or #ifndef
+		if ($openIfCount > 0) {
+			
+			preg_match('!^\s*(#|\/\/|\/\*)#endif(.*?)(\*\/)?\s*$!', $s, $matches);
+			if ($matches && ($matches[1] != '/*' || isset($matches[3]))) {
+				$openIfCount--;
+				if ($skip) {
+					$skip = false;
+				}
+				continue;
+			}
+		}		
+		
 		if ($skip) {
 			continue;
 		}
@@ -75,7 +90,8 @@ function preprocFile($inName, $constants, $fout)
 			if ($matches[2] == '#ifndef') {
 				$skip = !$skip;
 			}
-			
+			$openIfCount++;
+			continue;
 		}
 		
 		//it's not command for preprocessor
