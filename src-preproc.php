@@ -54,11 +54,24 @@ function preprocFile($inName, $constants, $fout)
 			preg_match('!^\s*(#|\/\/|\/\*)#endif(.*?)(\*\/)?\s*$!', $s, $matches);
 			if ($matches && ($matches[1] != '/*' || isset($matches[3]))) {
 				$openIfCount--;
-				if ($skip) {
+				if ($skip && $openIfCount === 0) {
 					$skip = false;
 				}
 				continue;
 			}
+		}		
+		
+		//it's #ifdef or ifndef
+		preg_match('!^\s*(#|\/\/|\/\*)(#ifn?def)\s+(.+?)(\*\/)?\s*$!', $s, $matches);
+		if ($matches && ($matches[1] != '/*' || isset($matches[4]))) {
+			if (! $skip) {
+				$skip = !in_array(trim($matches[3]), $constants);
+				if ($matches[2] == '#ifndef') {
+					$skip = !$skip;
+				}				
+			}
+			$openIfCount++;
+			continue;
 		}		
 		
 		if ($skip) {
@@ -83,17 +96,6 @@ function preprocFile($inName, $constants, $fout)
 			continue;
 		}	
 		
-		//it's #ifdef or ifndef
-		preg_match('!^\s*(#|\/\/|\/\*)(#ifn?def)\s+(.+?)(\*\/)?\s*$!', $s, $matches);
-		if ($matches && ($matches[1] != '/*' || isset($matches[4]))) {
-			$skip = !in_array(trim($matches[3]), $constants);
-			if ($matches[2] == '#ifndef') {
-				$skip = !$skip;
-			}
-			$openIfCount++;
-			continue;
-		}
-		
 		//it's not command for preprocessor
 		fputs($fout, $s);
 		if (substr($s, -1) !== "\n") {
@@ -103,5 +105,11 @@ function preprocFile($inName, $constants, $fout)
 	
 	fclose($fin);
 	chdir($preWd);
+	
+	if ($openIfCount !== 0) {
+		echo "ERROR in \"".  realpath($inName)."\": #endif missing \r\n";
+		return false;
+	}
+	
 	return true;
 }
