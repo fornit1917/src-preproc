@@ -5,3 +5,5 @@ Simple script to handle text files by means of c-like the directives (#include, 
 
 Is in development. At the moment, has implemented the following command:
 * #include
+* #ifdef
+* #ifndef
