@@ -3,7 +3,7 @@ src-preproc
 
 Simple script to process text files by means of c-like the directives (#include, #ifdef, #ifndef). Written in php.
 
-# Usage 
+### Usage 
 
 `php src-preproc.php /path/to/input/file /path/to/output/file`
 
@@ -51,7 +51,7 @@ If  CONSTANT_NAME specified in the list of constants when calling the script,
 the code is to be concluded between **#ifdef** and **#endif**, will be writed in the output file. 
 Otherwise, he will be skipped. For **#ifndef** all conversely.
 
-# Examples
+### Examples
 
 input.js:
 
