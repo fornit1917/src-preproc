@@ -30,7 +30,7 @@ elseif($ok) {
 	echo "Preprocessing completed successfully\r\n";
 }
 
-function preprocFile($inName, $constants, $fout)
+function preprocFile($inName, $constants, $fout, $indent='')
 {
 	$fin = @fopen($inName, 'r');
 	if ($fin === false) {
@@ -87,8 +87,8 @@ function preprocFile($inName, $constants, $fout)
 				chdir($preWd);
 				return false;
 			}
-			
-			$ok = preprocFile($includeName, $constants, $fout);
+			$newIndent = $indent . getIndent($s);
+			$ok = preprocFile($includeName, $constants, $fout, $newIndent);
 			if (! $ok) {
 				chdir($preWd);
 				return false;
@@ -97,7 +97,7 @@ function preprocFile($inName, $constants, $fout)
 		}	
 		
 		//it's not command for preprocessor
-		fputs($fout, $s);
+		fputs($fout, $indent.$s);
 		if (substr($s, -1) !== "\n") {
 			fputs($fout, "\r\n");
 		}
@@ -112,4 +112,10 @@ function preprocFile($inName, $constants, $fout)
 	}
 	
 	return true;
+}
+
+function getIndent($s) 
+{
+	preg_match('!^(\s*)!', $s, $matches);
+	return ($matches && isset($matches[1])) ? $matches[1] : '';
 }
